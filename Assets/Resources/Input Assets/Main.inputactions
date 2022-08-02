@@ -6,9 +6,18 @@
             "id": "6059fb60-d66f-4af1-b637-f2846be1138b",
             "actions": [
                 {
-                    "name": "Space Bar",
+                    "name": "Action",
                     "type": "Button",
                     "id": "1d8d12af-b47f-4464-9868-74ac1c215be0",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "Press(behavior=2)",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Rebind",
+                    "type": "Button",
+                    "id": "115c576f-7732-47bf-a85f-b199ccc07fd7",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "Press(behavior=2)",
@@ -23,7 +32,18 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Keyboard",
-                    "action": "Space Bar",
+                    "action": "Action",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2623b87e-0d66-4769-be46-111885eda4b5",
+                    "path": "<Keyboard>/enter",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard",
+                    "action": "Rebind",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

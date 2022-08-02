@@ -17,4 +17,6 @@ MonoBehaviour:
   overrideable: 0
   keySettings:
   - enumKey: 0
-    actionName: Space Bar
+    actionName: Action
+  - enumKey: 1
+    actionName: Rebind

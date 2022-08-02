@@ -53,8 +53,10 @@ namespace InputManager.Infra
             _inputActionAsset = Resources.Load<InputActionAsset>($"Input Assets/{_keySettings.inputAssetName}");
             if (_inputActionAsset == null)
             {
-                throw new Exception($"InputManager could not find the input action asset at 'Resources/Input Assets/{_keySettings.inputAssetName}!");
+                throw new Exception(
+                    $"InputManager could not find the input action asset at 'Resources/Input Assets/{_keySettings.inputAssetName}!");
             }
+
             _inputActionMap = _inputActionAsset.FindActionMap($"{_keySettings.inputMapName}", true);
 
             foreach (var setting in _keySettings.keySettings)
@@ -71,7 +73,7 @@ namespace InputManager.Infra
 
             _inputActionAsset.Enable();
         }
-        
+
         /// <summary>
         /// Injection occurs after constructor, so we need to rebind after the first binding.
         /// </summary>
@@ -216,6 +218,7 @@ namespace InputManager.Infra
         }
 
         public void RequestRebind(T target,
+            string targetBindingGroup,
             Func<InputActionRebindingExtensions.RebindingOperation, InputActionRebindingExtensions.RebindingOperation>
                 operationConfigCallback,
             Action onComplete = null,
@@ -225,12 +228,13 @@ namespace InputManager.Infra
             var keySetting = _keySettings.keySettings.First(kv => Equals(kv.enumKey, target));
             var action = _inputActions.First(a => a.name == keySetting.actionName);
             // Save the previous key binding for duplicated keys
-            var previousBinding = action.bindings.First(b => b.groups == "Keyboard");
+            var previousBinding = action.bindings.First(b => b.groups.Split(";").Any(g => g == targetBindingGroup));
             var previousEffectivePath = previousBinding.effectivePath;
             _inputActionAsset.Disable();
             _currentRebindingOperation = operationConfigCallback.Invoke(action.PerformInteractiveRebinding());
 
             _currentRebindingOperation
+                .WithBindingGroup(targetBindingGroup)
                 .OnMatchWaitForAnother(0.1f)
                 .Start();
             _currentRebindingOperation

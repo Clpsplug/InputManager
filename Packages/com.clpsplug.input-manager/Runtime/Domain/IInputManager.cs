@@ -158,6 +158,7 @@ namespace InputManager.Domain
         /// Start a rebind attempt. This is async. Calls <see cref="OnRebindDelegate{T}"/> on any state of completion.
         /// </summary>
         /// <param name="target">Rebind target</param>
+        /// <param name="targetBindingGroup">The group in which the target key bind is associated with</param>
         /// <param name="operationConfigCallback">
         /// Callback to set up the rebinding operation options
         /// </param>
@@ -165,6 +166,7 @@ namespace InputManager.Domain
         /// <param name="onCancel">Callback on cancelled rebind attempt</param>
         void RequestRebind(
             T target,
+            string targetBindingGroup,
             Func<InputActionRebindingExtensions.RebindingOperation, InputActionRebindingExtensions.RebindingOperation>
                 operationConfigCallback,
             Action onComplete = null,
