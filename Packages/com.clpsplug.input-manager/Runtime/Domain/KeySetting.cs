@@ -14,7 +14,7 @@ namespace InputManager.Domain
     {
         /// <summary>
         /// Input asset file name to look at, without the extension.
-        /// The asset MUST be in your Resources folder.
+        /// The asset MUST be in your Resources/Input Assets folder.
         /// </summary>
         public string inputAssetName;
         

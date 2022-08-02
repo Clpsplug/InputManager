@@ -35,7 +35,7 @@ namespace InputManager.Infra
         /// </summary>
         public virtual int TargetFrameRate => 60;
 
-        protected InputManager(KeySetting<T> keySetting)
+        public InputManager(KeySetting<T> keySetting)
         {
             if (keySetting == null)
             {
@@ -51,6 +51,10 @@ namespace InputManager.Infra
             _keySettings = keySetting;
 
             _inputActionAsset = Resources.Load<InputActionAsset>($"Input Assets/{_keySettings.inputAssetName}");
+            if (_inputActionAsset == null)
+            {
+                throw new Exception($"InputManager could not find the input action asset at 'Resources/Input Assets/{_keySettings.inputAssetName}!");
+            }
             _inputActionMap = _inputActionAsset.FindActionMap($"{_keySettings.inputMapName}", true);
 
             foreach (var setting in _keySettings.keySettings)
