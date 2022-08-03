@@ -13,6 +13,7 @@ namespace InputManager.Infra
 
         private OnKeyDownDelegate<T> _onKeyDownDelegates;
         private OnKeyHoldDelegate<T> _onKeyHoldDelegates;
+        private OnKeyHoldFrameRateUnawareDelegate<T> _onKeyHoldFrameRateUnawareDelegates;
         private OnKeyUpDelegate<T> _onKeyUpDelegates;
         private OnRebindDelegate<T> _onRebindDelegates;
 
@@ -20,6 +21,7 @@ namespace InputManager.Infra
 
         private readonly Dictionary<T, bool> _isKeyPressed = new Dictionary<T, bool>();
 
+        private readonly Dictionary<T, int> _keyHoldFrames = new Dictionary<T, int>();
         private readonly Dictionary<T, float> _keyHoldLengths = new Dictionary<T, float>();
 
         private InputActionRebindingExtensions.RebindingOperation _currentRebindingOperation;
@@ -69,6 +71,7 @@ namespace InputManager.Infra
             {
                 _isKeyPressed.Add(key.enumKey, false);
                 _keyHoldLengths.Add(key.enumKey, 0f);
+                _keyHoldFrames.Add(key.enumKey, 0);
             }
 
             _inputActionAsset.Enable();
@@ -154,19 +157,23 @@ namespace InputManager.Infra
                         {
                             Debug.LogWarning("This InputManager is disabled!");
                             _keyHoldLengths[key.Key] = 0f;
+                            _keyHoldFrames[key.Key] = 0;
                             return;
                         }
 #endif
                         var previousLength = _keyHoldLengths[key.Key];
+                        _keyHoldFrames[key.Key] += 1;
                         _keyHoldLengths[key.Key] += Time.deltaTime;
                         var currentFrameCount = Mathf.RoundToInt(_keyHoldLengths[key.Key] / (1.0f / TargetFrameRate));
                         var previousFrameCount = Mathf.RoundToInt(previousLength / (1.0f / TargetFrameRate));
                         _onKeyHoldDelegates?.Invoke(key.Key, currentFrameCount, previousFrameCount);
+                        _onKeyHoldFrameRateUnawareDelegates?.Invoke(key.Key, _keyHoldFrames[key.Key]);
                     }
                     else
                     {
                         // You need to reset HERE
                         _keyHoldLengths[key.Key] = 0f;
+                        _keyHoldFrames[key.Key] = 0;
                     }
                 }
             }
@@ -184,6 +191,7 @@ namespace InputManager.Infra
             {
                 _isKeyPressed[key] = false;
                 _keyHoldLengths[key] = 0f;
+                _keyHoldFrames[key] = 0;
             }
         }
 
@@ -202,9 +210,15 @@ namespace InputManager.Infra
             _onKeyHoldDelegates += d;
         }
 
+        public void AddOnKeyHoldDelegate(OnKeyHoldFrameRateUnawareDelegate<T> d)
+        {
+            _onKeyHoldFrameRateUnawareDelegates += d;
+        }
+        
         public void ResetOnKeyHoldDelegate()
         {
             _onKeyHoldDelegates = null;
+            _onKeyHoldFrameRateUnawareDelegates = null;
         }
 
         public void AddOnKeyUpDelegate(OnKeyUpDelegate<T> d)

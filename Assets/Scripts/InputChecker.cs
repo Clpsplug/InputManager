@@ -6,11 +6,14 @@ using UnityEngine.UI;
 
 public class InputChecker : MonoBehaviour
 {
-    [SerializeField] private Text spaceBarStatus;
+    [SerializeField] private Text actionKeyStatus;
     [SerializeField] private Text rebindInstruction;
 
     [SerializeField] private SampleKeySettings sampleKeySettings;
     private IInputManager<SampleKeys> _inputManager;
+
+    private int _adjustedFrameCount;
+    private int _unadjustedFrameCount;
 
     private void Awake()
     {
@@ -22,6 +25,7 @@ public class InputChecker : MonoBehaviour
         _inputManager.AddOnKeyDownDelegate(OnKeyDown);
         _inputManager.AddOnKeyUpDelegate(OnKeyUp);
         _inputManager.AddOnKeyHoldDelegate(OnKeyHold);
+        _inputManager.AddOnKeyHoldDelegate(OnKeyHoldUnadjusted);
         _inputManager.AddOnRebindDelegate(OnKeyRebound);
     }
 
@@ -29,6 +33,15 @@ public class InputChecker : MonoBehaviour
     {
         // This is mandatory for our input manager to realize something is going on.
         _inputManager.CheckKey();
+        if (_adjustedFrameCount != 0 || _unadjustedFrameCount != 0)
+        {
+            actionKeyStatus.text =
+                $"ON\nHeld for {_unadjustedFrameCount} frames\n(raw frame count)\nHeld for {_adjustedFrameCount} frames\n(adjusted for input manager's target frame rate ({_inputManager.TargetFrameRate} fps.)";
+        }
+        else
+        {
+            actionKeyStatus.text = "OFF";
+        }
     }
 
     private void OnKeyDown(SampleKeys k)
@@ -36,7 +49,7 @@ public class InputChecker : MonoBehaviour
         switch (k)
         {
             case SampleKeys.Action:
-                spaceBarStatus.text = "ON";
+                actionKeyStatus.text = "ON";
                 break;
             case SampleKeys.Rebind:
                 rebindInstruction.text =
@@ -69,7 +82,8 @@ public class InputChecker : MonoBehaviour
         switch (k)
         {
             case SampleKeys.Action:
-                spaceBarStatus.text = "OFF";
+                _adjustedFrameCount = 0;
+                _unadjustedFrameCount = 0;
                 break;
         }
     }
@@ -79,8 +93,17 @@ public class InputChecker : MonoBehaviour
         switch (k)
         {
             case SampleKeys.Action:
-                spaceBarStatus.text =
-                    $"ON: Held for {currentFrame} frames\n(adjusted for input manager's target frame rate ({_inputManager.TargetFrameRate} fps.)";
+                _adjustedFrameCount = currentFrame;
+                break;
+        }
+    }
+
+    private void OnKeyHoldUnadjusted(SampleKeys k, int currentFrame)
+    {
+        switch (k)
+        {
+            case SampleKeys.Action:
+                _unadjustedFrameCount = currentFrame;
                 break;
         }
     }
