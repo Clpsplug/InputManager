@@ -4,6 +4,8 @@
   "displayName": "Input Manager",
   "description": "A wrapper for defining key actions within code using Unity's New Input System",
   "unity": "2019.1",
+  "documentationUrl": "https://github.com/Clpsplug/InputManager/wiki",
+  "license": "MIT",
   "author": {
     "name": "C. Plug",
     "email": "clpsplug@clpsplug.com",
