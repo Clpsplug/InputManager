@@ -1,6 +1,6 @@
 {
   "name": "input-manager",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "displayName": "Input Manager",
   "description": "A wrapper for defining key actions within code using Unity's New Input System",
   "unity": "2019.1",
