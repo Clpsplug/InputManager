@@ -39,6 +39,10 @@ namespace InputManager.Domain
         }
     }
 
+    /// <summary>
+    /// Key config item for <see cref="KeySetting{TEnum}"/>
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     [Serializable]
     public class KeyEnumPair<T> where T : Enum
     {
