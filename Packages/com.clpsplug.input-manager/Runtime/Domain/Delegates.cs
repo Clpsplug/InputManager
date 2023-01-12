@@ -31,7 +31,7 @@ namespace InputManager.Domain
     /// OR may skip a large number of frame counts (if actual fps &lt; <see cref="IInputManager{T}.TargetFrameRate"/>.)
     /// That's why there are frame counts for previous actual game frame and the current actual game frame.
     /// On timing-aware context, if currentFrame == previousFrame, drop that frame.
-    /// If currentFrame - previousFrame &gt; 1, you may want to enumerate over each frame that went past between these.
+    /// If currentFrame - previousFrame &gt; 1, you may want to iterate over frames that went past between these.
     /// </remarks>
     public delegate void OnKeyHoldDelegate<in T>(T key, int currentFrame, int previousFrame) where T : Enum;
 

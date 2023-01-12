@@ -11,6 +11,10 @@ namespace InputManager.Infra
     /// Common implementations for Input Managers.
     /// </summary>
     /// <typeparam name="T"></typeparam>
+    /// <remarks>
+    /// TBD: This may be a weird practice. This class is used like a "trait" - this class is 'mixed into' other interface implementations to add implementations missing from the said one.
+    /// We may be better off making a corresponding interface for this one.
+    /// </remarks>
     public abstract class BaseInputManager<T> where T : Enum
     {
         protected readonly bool IsReady = false;

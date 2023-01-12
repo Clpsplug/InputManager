@@ -96,8 +96,7 @@ namespace InputManager.Domain
 
         /// <summary>
         /// Change the polling frequency and the time until <see cref="CheckKey"/> returns.
-        /// WARNING: This will change <see cref="InputSystem.pollingFrequency"/> as well which means it will be applied everywhere.
-        /// WARNING: Be wary if you are using multiple <see cref="IFrameUnlockedInputManager{T}"/> at once.
+        /// WARNING: This will change <see cref="InputSystem.pollingFrequency"/> which means it will be applied everywhere. Be wary if you are using multiple <see cref="IFrameUnlockedInputManager{T}"/> at once.
         /// </summary>
         /// <param name="frequency"></param>
         void SetPollingFrequency(int frequency);
