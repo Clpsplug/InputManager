@@ -1,13 +1,14 @@
 using InputManager.Domain;
 using InputManager.Infra;
 using JetBrains.Annotations;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class InputChecker : MonoBehaviour
 {
-    [SerializeField] private Text actionKeyStatus;
-    [SerializeField] private Text rebindInstruction;
+    [SerializeField] private TextMeshProUGUI actionKeyStatus;
+    [SerializeField] private TextMeshProUGUI rebindInstruction;
 
     [SerializeField] private SampleKeySettings sampleKeySettings;
     private IInputManager<SampleKeys> _inputManager;
@@ -36,7 +37,7 @@ public class InputChecker : MonoBehaviour
         if (_adjustedFrameCount != 0 || _unadjustedFrameCount != 0)
         {
             actionKeyStatus.text =
-                $"ON\nHeld for {_unadjustedFrameCount} frames\n(raw frame count)\nHeld for {_adjustedFrameCount} frames\n(adjusted for input manager's target frame rate ({_inputManager.TargetFrameRate} fps.)";
+                $"ON\nHeld for {_unadjustedFrameCount} frames\n(raw frame count)\nHeld for {_adjustedFrameCount} frames\n(adjusted for input manager's target frame rate ({_inputManager.TargetFrameRate} fps.))";
         }
         else
         {
