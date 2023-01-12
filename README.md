@@ -2,10 +2,12 @@
 
 **WARNING!**: This plugin is not stable yet!!
 
-This plugin for Unity3D is the wrapper for Unity's New Input Manager.  
+This plugin for Unity3D is the wrapper for using Unity's New Input Manager
+programatically (i.e., without using related components.)  
 With this plugin, you can:
 
 * Handle key presses as your custom `enums`
+* Handle key presses in a 'frame-unlocked' manner
 * "Hold frame count" with small effect from framerate fluctuation
 * Rebinding the assigned key (i.e., key config.)
     * Output the custom bindings as serializable dictionary format
