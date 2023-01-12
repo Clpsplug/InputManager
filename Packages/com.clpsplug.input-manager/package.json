@@ -2,7 +2,7 @@
   "name": "input-manager",
   "version": "0.0.1",
   "displayName": "Input Manager",
-  "description": "A wrapper for defining key actions within code using Unity's New Input System",
+  "description": "A wrapper for keyboar & mouse button actions of Unity's New Input System",
   "unity": "2019.1",
   "documentationUrl": "https://github.com/Clpsplug/InputManager/wiki",
   "license": "MIT",
@@ -15,6 +15,6 @@
     "input"
   ],
   "dependencies": {
-    "com.unity.inputsystem": "1.4.1"
+    "com.unity.inputsystem": "1.4.4"
   }
 }

@@ -1,4 +1,5 @@
 using System;
+using JetBrains.Annotations;
 
 namespace InputManager.Domain
 {
@@ -11,8 +12,8 @@ namespace InputManager.Domain
 
     /// <summary>
     /// Delegate to check key hold event. Takes current Frame and the previous Frame,
-    /// where Frame is an integer that _would_ be the frame count if the game were to run
-    /// on <see cref="IInputManager{T}.TargetFrameRate"/> which is by default 60fps.
+    /// where Frame is an integer that <i>would</i> be the frame count if the game were to run constantly
+    /// with <see cref="IInputManager{T}.TargetFrameRate"/> which is by default 60fps.
     /// </summary>
     /// <param name="key"></param>
     /// <param name="currentFrame">
@@ -72,12 +73,60 @@ namespace InputManager.Domain
     /// </param>
     /// <param name="swappedActionName">
     /// Action name of the swapped key bind on this rebind attempt.
-    /// If this is not null, this action now has the binding indicated by swappedBinding.
+    /// If this is not null, this action now has the binding indicated by <see cref="swappedBinding"/>.
     /// </param>
     /// <param name="swappedBinding">
-    /// See swappedActionName.
+    /// See <see cref="swappedActionName"/>.
     /// </param>
     /// <typeparam name="T">Action type expressed within the code</typeparam>
     public delegate void OnRebindDelegate<in T>(T target, bool isCancelled, string readableKey, bool isDuplicate,
-        string swappedActionName, string swappedBinding) where T : Enum;
+        [CanBeNull] string swappedActionName, [CanBeNull] string swappedBinding) where T : Enum;
+
+#if UNITASK
+    /// <summary>
+    /// "High-frequency" variant of <see cref="OnKeyDownDelegate{T}"/>.
+    /// The main idea is that this delegate is called with time information.
+    /// <b>DO</b> expect this delegate to be called multiple times within a single frame,
+    /// each call indicating a change that occurred since the last frame update.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="actionTimestamp">
+    /// Timestamp (<see cref="UnityEngine.Time.realtimeSinceStartupAsDouble"/>) of this action
+    /// </param>
+    /// <param name="currentTimestamp">
+    /// Equivalent of <see cref="UnityEngine.Time.realtimeSinceStartupAsDouble"/>
+    /// </param>
+    /// <remarks>
+    /// <see cref="currentTimestamp"/> - <see cref="actionTimestamp"/> may be of use for you;
+    /// use this information to calculate the time by which the action occurred earlier than the current frame.
+    /// </remarks>
+    public delegate void OnKeyDownFrameUnlockedDelegate<in T>(T key, double actionTimestamp, double currentTimestamp)
+        where T : Enum;
+
+    /// <summary>
+    /// "High-frequency" variant of <see cref="OnKeyHoldDelegate{T}"/>.
+    /// Instead of hold frame count, it comes with key down timestamp and current timestamp.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public delegate void OnKeyHoldFrameUnlockedDelegate<in T>(T key, double keyDownTimestamp, double currentTimestamp)
+        where T : Enum;
+
+    /// <summary>
+    /// "High-frequency" variant of <see cref="OnKeyUpDelegate{T}"/>.
+    /// The main idea is that this delegate is called with time information.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="actionTimestamp">
+    /// Timestamp (<see cref="UnityEngine.Time.realtimeSinceStartupAsDouble"/>) of this action (seconds)
+    /// </param>
+    /// <param name="currentTimestamp">
+    /// Equivalent of <see cref="UnityEngine.Time.realtimeSinceStartupAsDouble"/> (seconds)
+    /// </param>
+    /// <remarks>
+    /// <see cref="currentTimestamp"/> - <see cref="actionTimestamp"/> may be of use for you;
+    /// use this information to calculate the time by which the action occurred earlier than the current frame.
+    /// </remarks>
+    public delegate void OnKeyUpFrameUnlockedDelegate<in T>(T key, double actionTimestamp, double currentTimestamp)
+        where T : Enum;
+#endif
 }

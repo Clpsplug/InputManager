@@ -7,7 +7,7 @@ namespace InputManager.Domain
     /// <summary>
     /// Extend this class to create your own Key Settings.
     /// Ideally, there should be one extended class for a set of key group.
-    /// The default keymap is assigned with the Input System's "Input Asset."
+    /// The default keymap is assigned using the Input System's "Input Asset."
     /// </summary>
     /// <typeparam name="TEnum"></typeparam>
     public abstract class KeySetting<TEnum> : ScriptableObject where TEnum : Enum
