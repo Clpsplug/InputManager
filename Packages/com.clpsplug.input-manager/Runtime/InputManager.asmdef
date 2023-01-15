@@ -1,23 +1,23 @@
 {
-    "name": "InputManager",
-    "rootNamespace": "InputManager",
-    "references": [
-        "Unity.InputSystem",
-        "UniTask"
-    ],
-    "includePlatforms": [],
-    "excludePlatforms": [],
-    "allowUnsafeCode": false,
-    "overrideReferences": false,
-    "precompiledReferences": [],
-    "autoReferenced": true,
-    "defineConstraints": [],
-    "versionDefines": [
-        {
-            "name": "com.cysharp.unitask",
-            "expression": "2.0.0",
-            "define": "UNITASK"
-        }
-    ],
-    "noEngineReferences": false
+  "name": "InputManager",
+  "rootNamespace": "InputManager",
+  "references": [
+    "Unity.InputSystem",
+    "UniTask"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [
+    {
+      "name": "com.cysharp.unitask",
+      "expression": "2.0.0",
+      "define": "UNITASK"
+    }
+  ],
+  "noEngineReferences": false
 }

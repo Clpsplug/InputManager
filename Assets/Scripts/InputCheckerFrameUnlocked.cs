@@ -1,55 +1,40 @@
+using System.Threading;
 using InputManager.Domain;
 using InputManager.Infra;
 using JetBrains.Annotations;
 using TMPro;
 using UnityEngine;
 
-public class InputChecker : MonoBehaviour
+public class InputCheckerFrameUnlocked : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI actionKeyStatus;
     [SerializeField] private TextMeshProUGUI rebindInstruction;
 
     [SerializeField] private SampleKeySettings sampleKeySettings;
-    private IInputManager<SampleKeys> _inputManager;
+    private IFrameUnlockedInputManager<SampleKeys> _inputManager;
 
-    private int _adjustedFrameCount;
-    private int _unadjustedFrameCount;
-
-    private void Awake()
-    {
-        _inputManager = new InputManager<SampleKeys>(sampleKeySettings);
-    }
-
+    private CancellationTokenSource _cancellationTokenSource;
+#if UNITASK
     private void Start()
     {
+        _inputManager = new FrameUnlockedInputManager<SampleKeys>(sampleKeySettings);
         _inputManager.AddOnKeyDownDelegate(OnKeyDown);
-        _inputManager.AddOnKeyUpDelegate(OnKeyUp);
-        _inputManager.AddOnKeyHoldDelegate(OnKeyHold);
-        _inputManager.AddOnKeyHoldDelegate(OnKeyHoldUnadjusted);
         _inputManager.AddOnRebindDelegate(OnKeyRebound);
+        _inputManager.SetPollingFrequency(1000);
+
+        // NOTE: It is essential to create a cancellation token and explicitly cancel the CheckKey method. Otherwise, it may lead to memory leaks.
+        _cancellationTokenSource = new CancellationTokenSource();
+        _inputManager.CheckKey(() => true, _cancellationTokenSource.Token);
     }
 
-    private void Update()
-    {
-        // This is mandatory for our input manager to realize something is going on.
-        _inputManager.CheckKey();
-        if (_adjustedFrameCount != 0 || _unadjustedFrameCount != 0)
-        {
-            actionKeyStatus.text =
-                $"ON\nHeld for {_unadjustedFrameCount} frames\n(raw frame count)\nHeld for {_adjustedFrameCount} frames\n(adjusted for input manager's target frame rate ({_inputManager.TargetFrameRate} fps.))";
-        }
-        else
-        {
-            actionKeyStatus.text = "OFF";
-        }
-    }
-
-    private void OnKeyDown(SampleKeys k)
+    private void OnKeyDown(SampleKeys k, double actionTimestamp, double currentTimestamp)
     {
         switch (k)
         {
             case SampleKeys.Action:
-                actionKeyStatus.text = "ON";
+                actionKeyStatus.text =
+                    $"Action key was pressed at\n{actionTimestamp:F5} since starting this session,\nwhich is {currentTimestamp - actionTimestamp:F5} seconds\nbefore this frame.";
+                Debug.Log($"Action Timestamp: {actionTimestamp:F5} (s), Current Timestamp: {currentTimestamp:F5} (s)");
                 break;
             case SampleKeys.Rebind:
                 rebindInstruction.text =
@@ -77,37 +62,6 @@ public class InputChecker : MonoBehaviour
         }
     }
 
-    private void OnKeyUp(SampleKeys k)
-    {
-        switch (k)
-        {
-            case SampleKeys.Action:
-                _adjustedFrameCount = 0;
-                _unadjustedFrameCount = 0;
-                break;
-        }
-    }
-
-    private void OnKeyHold(SampleKeys k, int currentFrame, int previousFrame)
-    {
-        switch (k)
-        {
-            case SampleKeys.Action:
-                _adjustedFrameCount = currentFrame;
-                break;
-        }
-    }
-
-    private void OnKeyHoldUnadjusted(SampleKeys k, int currentFrame)
-    {
-        switch (k)
-        {
-            case SampleKeys.Action:
-                _unadjustedFrameCount = currentFrame;
-                break;
-        }
-    }
-
     private void OnKeyRebound(SampleKeys target, bool isCancelled, string readableKey, bool isDuplicate,
         [CanBeNull] string swappedActionName, [CanBeNull] string swappedBinding)
     {
@@ -120,4 +74,15 @@ public class InputChecker : MonoBehaviour
         rebindInstruction.text =
             $"Key bind for action {target} has been bound to {readableKey}.\nPress the enter key to start rebind again.";
     }
+
+    private void OnDestroy()
+    {
+        // Cancel unless something crashed at Start()
+        _cancellationTokenSource?.Cancel();
+    }
+#else
+    private void Start() {
+        rebindInstruction.text = "Hey! This sample requires UniTask but you don't seem to have it. Try installing it via UPM.";
+    }
+#endif
 }

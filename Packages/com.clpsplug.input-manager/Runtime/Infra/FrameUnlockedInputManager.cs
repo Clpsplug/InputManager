@@ -75,11 +75,6 @@ namespace InputManager.Infra
 
                 while (true)
                 {
-                    if (!IsReady)
-                    {
-                        Debug.Log("Not ready, please wait");
-                        continue;
-                    }
 #if !UNITY_EDITOR
                     // Editorでない場合はそのままreturn
                     if (!IsEnabled) return;

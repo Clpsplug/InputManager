@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Threading;
 #if UNITASK
+using System.Threading;
 using Cysharp.Threading.Tasks;
 #endif
 using UnityEngine.InputSystem;
@@ -68,10 +68,10 @@ namespace InputManager.Domain
         /// Checks for key input.
         /// Simply put, unlike for <see cref="IInputManager{T}"/>, this method checks for user inputs
         /// in a different "thread." This method runs in sync with Unity's player loop,
-        /// so you can do everything else without worrying about it.
-        /// It is best called from your Start or Awake methods.
+        /// so you can do everything else without worrying about it.<br/>
+        /// It is best called from your Start or Awake methods.<br/>
         /// You need to supply <see cref="CancellationToken"/> to ensure that you can stop it from outside
-        /// and release relevant resources to prevent memory leaks.
+        /// and release relevant resources to prevent memory leaks.<br/>
         /// See <see cref="CancellationTokenSource"/> for generating and issuing cancellation.
         /// </summary>
         /// <param name="enabledCondition">
@@ -95,8 +95,9 @@ namespace InputManager.Domain
         void AddOnKeyUpDelegate(OnKeyUpFrameUnlockedDelegate<T> d);
 
         /// <summary>
-        /// Change the polling frequency and the time until <see cref="CheckKey"/> returns.
-        /// WARNING: This will change <see cref="InputSystem.pollingFrequency"/> which means it will be applied everywhere. Be wary if you are using multiple <see cref="IFrameUnlockedInputManager{T}"/> at once.
+        /// Change the polling frequency.<br/>
+        /// WARNING: This is just a wrapper for <see cref="InputSystem.pollingFrequency"/> which means it will be applied everywhere.<br/>
+        /// Be wary if you are using multiple <see cref="IFrameUnlockedInputManager{T}"/> at once.
         /// </summary>
         /// <param name="frequency"></param>
         void SetPollingFrequency(int frequency);

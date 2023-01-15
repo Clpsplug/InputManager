@@ -12,12 +12,11 @@ namespace InputManager.Infra
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <remarks>
-    /// TBD: This may be a weird practice. This class is used like a "trait" - this class is 'mixed into' other interface implementations to add implementations missing from the said one.
+    /// TBD: This may be a weird practice. This class is used like a "trait" in PHP; that is, this class is 'mixed into' other incomplete interface implementations to add missing ones.
     /// We may be better off making a corresponding interface for this one.
     /// </remarks>
     public abstract class BaseInputManager<T> where T : Enum
     {
-        protected readonly bool IsReady = false;
         protected bool IsEnabled = true;
         protected OnRebindDelegate<T> OnRebindDelegates;
 
@@ -52,8 +51,7 @@ namespace InputManager.Infra
 
             foreach (var setting in KeySettings.keySettings)
             {
-                var inputAction = inputActionMap.FindAction(setting.actionName, true);
-                InputActions.Add(inputAction);
+                InputActions.Add( inputActionMap.FindAction(setting.actionName, true));
             }
 
             foreach (var key in KeySettings.keySettings)
@@ -144,8 +142,10 @@ namespace InputManager.Infra
                                 a =>
                                     a.name != action.name &&
                                     a.bindings.Any(b =>
-                                        b.effectivePath.ToLower() == path.ToLower() ||
-                                        (b.effectivePath == string.Empty) && b.path.ToLower() == path.ToLower())
+                                        string.Equals(b.effectivePath.ToLower(), path.ToLower(),
+                                            StringComparison.InvariantCulture) ||
+                                        (b.effectivePath == string.Empty && string.Equals(b.path.ToLower(),
+                                            path.ToLower(), StringComparison.InvariantCulture)))
                             );
 
 

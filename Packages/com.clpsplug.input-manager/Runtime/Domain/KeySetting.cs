@@ -17,7 +17,7 @@ namespace InputManager.Domain
         /// The asset MUST be in your Resources/Input Assets folder.
         /// </summary>
         public string inputAssetName;
-        
+
         /// <summary>
         /// Name of your input map.
         /// </summary>
@@ -50,6 +50,7 @@ namespace InputManager.Domain
         /// Enum member to use in the code
         /// </summary>
         public T enumKey;
+
         /// <summary>
         /// Input System's action name
         /// </summary>

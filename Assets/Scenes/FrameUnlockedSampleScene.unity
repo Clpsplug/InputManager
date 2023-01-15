@@ -132,7 +132,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 223079618}
-  - component: {fileID: 223079617}
+  - component: {fileID: 223079619}
   m_Layer: 0
   m_Name: InputChecker
   m_TagString: Untagged
@@ -140,21 +140,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &223079617
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 223079616}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e8239746241184e70928b0765f878bd2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  actionKeyStatus: {fileID: 1222614079}
-  rebindInstruction: {fileID: 1811224272}
-  sampleKeySettings: {fileID: 11400000, guid: 2deb0e11c327d4e3299c1f08aa2412e9, type: 2}
 --- !u!4 &223079618
 Transform:
   m_ObjectHideFlags: 0
@@ -170,6 +155,21 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &223079619
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 223079616}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3e935107d1e4bffbd718b0356802e6e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  actionKeyStatus: {fileID: 1222614079}
+  rebindInstruction: {fileID: 1811224272}
+  sampleKeySettings: {fileID: 11400000, guid: 2deb0e11c327d4e3299c1f08aa2412e9, type: 2}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -807,11 +807,11 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '<b>Try toggling VSync</b> (in the game view resolution dropdown) on and
-    off
-
-    and observe the difference between "<i>raw</i> frame count" and "<i>adjusted</i>
-    frame count."'
+  m_text: "This scene uses <b>frame-unlocked</b> InputManager.\nThis InputManager
+    can tell you <i>when</i> the action occurred \nin seconds since the game started
+    running.\nFYI, the InputManager has told the new Input System to poll the devices
+    1000 times every second.\n<b>Try toggling VSync</b> and see how earlier the action
+    can occur than the current frame."
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 5987e1d29fc614ed8bd04ff3b0bc6ea7, type: 2}
   m_sharedMaterial: {fileID: 3894098088474240337, guid: 5987e1d29fc614ed8bd04ff3b0bc6ea7, type: 2}

@@ -1,5 +1,5 @@
 public enum SampleKeys
 {
     Action,
-    Rebind
+    Rebind,
 }
