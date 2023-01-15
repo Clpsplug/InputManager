@@ -19,6 +19,5 @@ Please see the [README inside the package](Packages/com.clpsplug.input-manager/R
 
 # Acknowledgements
 
-The sample project has [M+ Font](https://github.com/coz-m/MPLUS_FONTS), which is avaiable under [SIL Open Font License 1.1](https://github.com/coz-m/MPLUS_FONTS/blob/master/OFL.txt).
-
-
+The sample project includes a TextMeshPro-rendered version of [M+ Font](https://github.com/coz-m/MPLUS_FONTS),
+which is avaiable under [SIL Open Font License 1.1](https://github.com/coz-m/MPLUS_FONTS/blob/master/OFL.txt).
