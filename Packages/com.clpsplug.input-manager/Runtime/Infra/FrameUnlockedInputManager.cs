@@ -32,7 +32,7 @@ namespace InputManager.Infra
 
         private Dictionary<InputAction, InputActionTrace> _traces;
 
-        private readonly object keyPressDictLock = new object();
+        private readonly object _keyPressDictLock = new object();
 
         public FrameUnlockedInputManager(KeySetting<T> keySetting) : base(keySetting)
         {
@@ -146,7 +146,7 @@ namespace InputManager.Infra
             }
 #endif
             // Locking this part b/c Disable() can mutate the content while enumerating.
-            lock (keyPressDictLock)
+            lock (_keyPressDictLock)
             {
                 foreach (var ksai in _keySettingsActionTraceRelation)
                 {
@@ -234,7 +234,7 @@ namespace InputManager.Infra
         public void Disable()
         {
             IsEnabled = false;
-            lock (keyPressDictLock)
+            lock (_keyPressDictLock)
             {
                 foreach (var key in KeyHoldLengths.Keys.ToList())
                 {

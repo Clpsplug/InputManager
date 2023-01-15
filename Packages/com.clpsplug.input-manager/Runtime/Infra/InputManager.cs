@@ -24,6 +24,8 @@ namespace InputManager.Infra
         /// </summary>
         public int TargetFrameRate => 60;
 
+        private readonly object _keyPressDictLock = new object();
+
         public InputManager(KeySetting<T> keySetting) : base(keySetting)
         {
             foreach (var key in KeySettings.keySettings)
@@ -40,64 +42,65 @@ namespace InputManager.Infra
             // If not editor, just return if not enabled.
             if (!_isEnabled) return;
 #endif
-            foreach (var action in InputActions)
+            // locking this part because Disable() method can mutate IsKeyPressed
+            lock (_keyPressDictLock)
             {
-                if (!action.triggered) continue;
+                foreach (var action in InputActions)
+                {
+                    if (!action.triggered) continue;
 #if UNITY_EDITOR
-                if (!IsEnabled)
-                {
-                    Debug.LogWarning("This input manager is disabled.");
-                    return;
-                }
-#endif
-                // Intentionally NOT using LINQ's First() method because it GC Alloc-s
-                foreach (var ks in KeySettings.keySettings)
-                {
-                    if (ks.actionName != action.name) continue;
-                    if (action.ReadValue<float>() > 0)
-                    {
-                        IsKeyPressed[ks.enumKey] = true;
-                        _onKeyDownDelegates?.Invoke(ks.enumKey);
-                    }
-                    else
-                    {
-                        IsKeyPressed[ks.enumKey] = false;
-                        _onKeyUpDelegates?.Invoke(ks.enumKey);
-                    }
-                }
-            }
-
-            // Intentionally copying the dictionary to 'freeze' the information
-            // for this frame. Disable() can mutate the content while enumerating.
-            // FIXME: should probably cache this dictionary somewhere
-            foreach (var key in new Dictionary<T, bool>(IsKeyPressed))
-            {
-                if (_onKeyHoldDelegates == null) continue;
-                if (key.Value)
-                {
-#if UNITY_EDITOR
-                    // If editor, log a warning to indicate that the key is picked up.
                     if (!IsEnabled)
                     {
-                        Debug.LogWarning("This InputManager is disabled!");
-                        KeyHoldLengths[key.Key] = 0f;
-                        _keyHoldFrames[key.Key] = 0;
+                        Debug.LogWarning("This input manager is disabled.");
                         return;
                     }
 #endif
-                    var previousLength = KeyHoldLengths[key.Key];
-                    _keyHoldFrames[key.Key] += 1;
-                    KeyHoldLengths[key.Key] += Time.deltaTime;
-                    var currentFrameCount = Mathf.RoundToInt(KeyHoldLengths[key.Key] / (1.0f / TargetFrameRate));
-                    var previousFrameCount = Mathf.RoundToInt(previousLength / (1.0f / TargetFrameRate));
-                    _onKeyHoldDelegates?.Invoke(key.Key, currentFrameCount, previousFrameCount);
-                    _onKeyHoldFrameRateUnawareDelegates?.Invoke(key.Key, _keyHoldFrames[key.Key]);
+                    // Intentionally NOT using LINQ's First() method because it GC Alloc-s
+                    foreach (var ks in KeySettings.keySettings)
+                    {
+                        if (ks.actionName != action.name) continue;
+                        if (action.ReadValue<float>() > 0)
+                        {
+                            IsKeyPressed[ks.enumKey] = true;
+                            _onKeyDownDelegates?.Invoke(ks.enumKey);
+                        }
+                        else
+                        {
+                            IsKeyPressed[ks.enumKey] = false;
+                            _onKeyUpDelegates?.Invoke(ks.enumKey);
+                        }
+                    }
                 }
-                else
+
+                foreach (var key in IsKeyPressed)
                 {
-                    // We need to reset these HERE
-                    KeyHoldLengths[key.Key] = 0f;
-                    _keyHoldFrames[key.Key] = 0;
+                    if (_onKeyHoldDelegates == null) continue;
+                    if (key.Value)
+                    {
+#if UNITY_EDITOR
+                        // If editor, log a warning to indicate that the key is picked up.
+                        if (!IsEnabled)
+                        {
+                            Debug.LogWarning("This InputManager is disabled!");
+                            KeyHoldLengths[key.Key] = 0f;
+                            _keyHoldFrames[key.Key] = 0;
+                            return;
+                        }
+#endif
+                        var previousLength = KeyHoldLengths[key.Key];
+                        _keyHoldFrames[key.Key] += 1;
+                        KeyHoldLengths[key.Key] += Time.deltaTime;
+                        var currentFrameCount = Mathf.RoundToInt(KeyHoldLengths[key.Key] / (1.0f / TargetFrameRate));
+                        var previousFrameCount = Mathf.RoundToInt(previousLength / (1.0f / TargetFrameRate));
+                        _onKeyHoldDelegates?.Invoke(key.Key, currentFrameCount, previousFrameCount);
+                        _onKeyHoldFrameRateUnawareDelegates?.Invoke(key.Key, _keyHoldFrames[key.Key]);
+                    }
+                    else
+                    {
+                        // We need to reset these HERE
+                        KeyHoldLengths[key.Key] = 0f;
+                        _keyHoldFrames[key.Key] = 0;
+                    }
                 }
             }
         }
@@ -112,11 +115,14 @@ namespace InputManager.Infra
         public void Disable()
         {
             IsEnabled = false;
-            foreach (var key in KeyHoldLengths.Keys.ToList())
+            lock (_keyPressDictLock)
             {
-                IsKeyPressed[key] = false;
-                KeyHoldLengths[key] = 0f;
-                _keyHoldFrames[key] = 0;
+                foreach (var key in KeyHoldLengths.Keys.ToList())
+                {
+                    IsKeyPressed[key] = false;
+                    KeyHoldLengths[key] = 0f;
+                    _keyHoldFrames[key] = 0;
+                }
             }
         }
 
