@@ -32,6 +32,8 @@ namespace InputManager.Infra
 
         private Dictionary<InputAction, InputActionTrace> _traces;
 
+        private readonly object keyPressDictLock = new object();
+
         public FrameUnlockedInputManager(KeySetting<T> keySetting) : base(keySetting)
         {
             _lastKeyDownTimestamp = keySetting.keySettings.Select(ks => ks.enumKey)
@@ -44,7 +46,7 @@ namespace InputManager.Infra
             InputSystem.pollingFrequency = freq;
         }
 
-        /// <inheritdoc cref="IFrameUnlockedInputManager{T}.CheckKey(Func{bool}"/>
+        /// <inheritdoc cref="IFrameUnlockedInputManager{T}.CheckKey(Func{bool})"/>
         public IEnumerator CheckKey(Func<bool> enabledCondition)
         {
             if (_isListeningForActions)
@@ -134,8 +136,8 @@ namespace InputManager.Infra
         private void CheckKeyLoop(Func<bool> enabledCondition)
         {
 #if !UNITY_EDITOR
-                    // Editorでない場合はそのままreturn
-                    if (!IsEnabled) return;
+            // return immediately if not Editor
+            if (!IsEnabled) return;
 #else
             if (!IsEnabled)
             {
@@ -143,60 +145,62 @@ namespace InputManager.Infra
                 return;
             }
 #endif
-            foreach (var ksai in _keySettingsActionTraceRelation)
+            // Locking this part b/c Disable() can mutate the content while enumerating.
+            lock (keyPressDictLock)
             {
-                var key = ksai.Key;
-                var trace = ksai.Value;
-                foreach (var action in trace)
+                foreach (var ksai in _keySettingsActionTraceRelation)
                 {
-                    var val = action.ReadValue<float>();
-                    if (enabledCondition())
+                    var key = ksai.Key;
+                    var trace = ksai.Value;
+                    foreach (var action in trace)
                     {
-                        if (val > Threshold && !IsKeyPressed[key.enumKey])
+                        var val = action.ReadValue<float>();
+                        if (enabledCondition())
                         {
-                            IsKeyPressed[ksai.Key.enumKey] = true;
-                            _onKeyDownDelegates?.Invoke(
-                                key.enumKey,
-                                action.time,
-                                Time.realtimeSinceStartupAsDouble
-                            );
-                            _lastKeyDownTimestamp[ksai.Key.enumKey] = action.time;
-                        }
+                            if (val > Threshold && !IsKeyPressed[key.enumKey])
+                            {
+                                IsKeyPressed[ksai.Key.enumKey] = true;
+                                _onKeyDownDelegates?.Invoke(
+                                    key.enumKey,
+                                    action.time,
+                                    Time.realtimeSinceStartupAsDouble
+                                );
+                                _lastKeyDownTimestamp[ksai.Key.enumKey] = action.time;
+                            }
 
-                        if (val <= Threshold && IsKeyPressed[key.enumKey])
-                        {
-                            IsKeyPressed[key.enumKey] = false;
-                            _onKeyUpDelegates?.Invoke(
-                                key.enumKey,
-                                action.time,
-                                Time.realtimeSinceStartupAsDouble
-                            );
+                            if (val <= Threshold && IsKeyPressed[key.enumKey])
+                            {
+                                IsKeyPressed[key.enumKey] = false;
+                                _onKeyUpDelegates?.Invoke(
+                                    key.enumKey,
+                                    action.time,
+                                    Time.realtimeSinceStartupAsDouble
+                                );
+                            }
                         }
                     }
+
+                    trace.Clear();
                 }
 
-                trace.Clear();
-            }
-
-            // Intentionally copying the dictionary to 'freeze' the information
-            // for this frame. Disable() can mutate the content while enumerating.
-            foreach (var key in new Dictionary<T, bool>(IsKeyPressed))
-            {
-                if (_onKeyHoldDelegates != null)
+                foreach (var key in IsKeyPressed)
                 {
-                    if (key.Value)
+                    if (_onKeyHoldDelegates != null)
                     {
-#if UNITY_EDITOR
-                        // Editorの場合、反応を示すために警告
-                        if (!IsEnabled)
+                        if (key.Value)
                         {
-                            Debug.LogWarning("This InputManager is disabled!");
-                            return;
-                        }
+#if UNITY_EDITOR
+                            // Log warning on Editor so that we know it is working
+                            if (!IsEnabled)
+                            {
+                                Debug.LogWarning("This InputManager is disabled!");
+                                return;
+                            }
 #endif
-                        _onKeyHoldDelegates?.Invoke(
-                            key.Key, _lastKeyDownTimestamp[key.Key], Time.realtimeSinceStartupAsDouble
-                        );
+                            _onKeyHoldDelegates?.Invoke(
+                                key.Key, _lastKeyDownTimestamp[key.Key], Time.realtimeSinceStartupAsDouble
+                            );
+                        }
                     }
                 }
             }
@@ -230,6 +234,14 @@ namespace InputManager.Infra
         public void Disable()
         {
             IsEnabled = false;
+            lock (keyPressDictLock)
+            {
+                foreach (var key in KeyHoldLengths.Keys.ToList())
+                {
+                    IsKeyPressed[key] = false;
+                    KeyHoldLengths[key] = 0f;
+                }
+            }
         }
 
         /// <inheritdoc cref="ICommonInputManagerMethods{T}.ResetOnKeyDownDelegate"/> 
