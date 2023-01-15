@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 #if UNITASK
 using System.Threading;
@@ -56,7 +57,6 @@ namespace InputManager.Domain
         int TargetFrameRate { get; }
     }
 
-#if UNITASK
     /// <summary>
     /// High frequency variant of <see cref="IInputManager{T}"/>.
     /// Some methods and delegates return <see cref="UniTask"/>.
@@ -64,6 +64,27 @@ namespace InputManager.Domain
     /// <typeparam name="T"></typeparam>
     public interface IFrameUnlockedInputManager<T> : ICommonInputManagerMethods<T> where T : Enum
     {
+
+        /// <summary>
+        /// Checks for key input.
+        /// If you are using this version, you <b>MUST</b> manually call <see cref="Dispose"/> to release internal resources.
+        /// </summary>
+        /// <param name="enabledCondition">
+        /// Condition under which you want to check for the key input.
+        /// You could use <see cref="ICommonInputManagerMethods{T}.Enable"/> or <see cref="ICommonInputManagerMethods{T}.Disable"/>, but
+        /// this is provided here so that you don't have to manually call them and potentially fail to stop the input detection in time.
+        /// </param>
+        /// <returns>
+        /// <see cref="IEnumerator"/> for use with <see cref="UnityEngine.MonoBehaviour.StartCoroutine(IEnumerator)"/>
+        /// </returns>
+        IEnumerator CheckKey(Func<bool> enabledCondition);
+
+        /// <summary>
+        /// Disposes of internal resources. Only required when using <see cref="CheckKey(Func{bool})"/>.
+        /// </summary>
+        void Dispose();
+        
+#if UNITASK
         /// <summary>
         /// Checks for key input.
         /// Simply put, unlike for <see cref="IInputManager{T}"/>, this method checks for user inputs
@@ -89,6 +110,7 @@ namespace InputManager.Domain
         /// </list>
         /// </exception>
         UniTask CheckKey(Func<bool> enabledCondition, CancellationToken token);
+#endif
 
         void AddOnKeyDownDelegate(OnKeyDownFrameUnlockedDelegate<T> d);
         void AddOnKeyHoldDelegate(OnKeyHoldFrameUnlockedDelegate<T> d);
@@ -102,7 +124,6 @@ namespace InputManager.Domain
         /// <param name="frequency"></param>
         void SetPollingFrequency(int frequency);
     }
-#endif
 
     /// <summary>
     /// Common input manager methods

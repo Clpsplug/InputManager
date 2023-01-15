@@ -1,4 +1,6 @@
+#if UNITASK
 using System.Threading;
+#endif
 using InputManager.Domain;
 using InputManager.Infra;
 using JetBrains.Annotations;
@@ -11,20 +13,28 @@ public class InputCheckerFrameUnlocked : MonoBehaviour
     [SerializeField] private TextMeshProUGUI rebindInstruction;
 
     [SerializeField] private SampleKeySettings sampleKeySettings;
-    private IFrameUnlockedInputManager<SampleKeys> _inputManager;
 
-    private CancellationTokenSource _cancellationTokenSource;
+    private IFrameUnlockedInputManager<SampleKeys> _inputManager;
 #if UNITASK
+    private CancellationTokenSource _cancellationTokenSource;
+#else
+    private Coroutine _checkKeyCoroutine;
+#endif
+
     private void Start()
     {
         _inputManager = new FrameUnlockedInputManager<SampleKeys>(sampleKeySettings);
         _inputManager.AddOnKeyDownDelegate(OnKeyDown);
         _inputManager.AddOnRebindDelegate(OnKeyRebound);
         _inputManager.SetPollingFrequency(1000);
-
+#if UNITASK
         // NOTE: It is essential to create a cancellation token and explicitly cancel the CheckKey method. Otherwise, it may lead to memory leaks.
         _cancellationTokenSource = new CancellationTokenSource();
         _inputManager.CheckKey(() => true, _cancellationTokenSource.Token);
+#else
+        // If using the Coroutine variant, manual resource disposal is required. See OnDestroy().
+        _checkKeyCoroutine = StartCoroutine(_inputManager.CheckKey(() => true));
+#endif
     }
 
     private void OnKeyDown(SampleKeys k, double actionTimestamp, double currentTimestamp)
@@ -77,12 +87,13 @@ public class InputCheckerFrameUnlocked : MonoBehaviour
 
     private void OnDestroy()
     {
+#if UNITASK
         // Cancel unless something crashed at Start()
         _cancellationTokenSource?.Cancel();
-    }
 #else
-    private void Start() {
-        rebindInstruction.text = "Hey! This sample requires UniTask but you don't seem to have it. Try installing it via UPM.";
-    }
+        // Stop the CheckKey coroutine and dispose of the internal resources
+        StopCoroutine(_checkKeyCoroutine);
+        _inputManager.Dispose();
 #endif
+    }
 }

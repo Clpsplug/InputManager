@@ -82,7 +82,6 @@ namespace InputManager.Domain
     public delegate void OnRebindDelegate<in T>(T target, bool isCancelled, string readableKey, bool isDuplicate,
         [CanBeNull] string swappedActionName, [CanBeNull] string swappedBinding) where T : Enum;
 
-#if UNITASK
     /// <summary>
     /// "High-frequency" variant of <see cref="OnKeyDownDelegate{T}"/>.
     /// The main idea is that this delegate is called with time information.
@@ -128,5 +127,4 @@ namespace InputManager.Domain
     /// </remarks>
     public delegate void OnKeyUpFrameUnlockedDelegate<in T>(T key, double actionTimestamp, double currentTimestamp)
         where T : Enum;
-#endif
 }
