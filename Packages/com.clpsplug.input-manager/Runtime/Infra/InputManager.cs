@@ -40,7 +40,7 @@ namespace InputManager.Infra
         {
 #if !UNITY_EDITOR
             // If not editor, just return if not enabled.
-            if (!_isEnabled) return;
+            if (!IsEnabled) return;
 #endif
             // locking this part because Disable() method can mutate IsKeyPressed
             lock (_keyPressDictLock)
